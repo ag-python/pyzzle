@@ -252,8 +252,9 @@ class Hotspot(Sprite):
                     slidefile=pyzzle.promptText('Enter slide file:', slidename+'.jpg')
                     if slidefile:
                         slide=Slide.Slide(slidename, slidefile, self.parent.stage)
+                        slide._refs={}
                         for ref in 'forward', 'up', 'down', 'right', 'left':
-                            setattr(slide, ref, None)
+                            slide._refs[ref]=None
                         slide._loadRefs()
                         slide.insert()
                 if slide:

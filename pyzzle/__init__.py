@@ -24,7 +24,7 @@ design=False
 menu=sys.exit
 history=[]
 
-def init(screensize=(800,600), name='Pyzzle', iconfile=None):
+def init(screensize=(800,600), name='Pyzzle', iconfile=None, fullscreen=False):
     """Initializes the screen. Must call before anything else.
     @type screensize: (int,int)
     @param screensize: Dimensions of the screen.
@@ -33,7 +33,8 @@ def init(screensize=(800,600), name='Pyzzle', iconfile=None):
     @param iconfile: name of the image file to display as the window's icon
     """
     pygame.init()
-    pyzzle.screen=pygame.display.set_mode(screensize)
+    pyzzle.screen=pygame.display.set_mode(screensize, 
+                                          pygame.FULLSCREEN if fullscreen else 0)
     pyzzle.panel.rect=pyzzle.screen.get_rect()
     if iconfile:
         icon=pygame.image.load(iconfile).convert_alpha()
