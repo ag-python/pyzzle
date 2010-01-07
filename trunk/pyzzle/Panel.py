@@ -13,7 +13,7 @@ class Panel(Sprite):
     cursorDefault='default.png'
     
     def __init__(self):
-        cursor=Panel.cursorDefault
+        self.cursor=Panel.cursorDefault
         
         Sprite.__init__(self)
         self._rect=Rect(0,0,0,0)
