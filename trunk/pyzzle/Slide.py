@@ -14,7 +14,6 @@ import standard
 import Text
 import media
 
-slides=Table()#A container for all slides that are currently instantiated.
 class Slide(Panel):
     """The basic building blocks of myst games.
     A typical slide represents a location the player can visit in the game world.
@@ -30,6 +29,10 @@ class Slide(Panel):
     Groups, they can manage the behavior of other Sprites that are nested within them.
     Typically, Hotspots are the only Sprites nested within Slides, but it is possible
     to store other types of Sprites, such as Text, Movies, and even other Slides."""
+    
+    __metaclass__=Table
+    
+    
     @staticmethod
     def _load(row):
         stage=pyzzle.stages[row.stage] if row.stage else None
@@ -59,8 +62,8 @@ class Slide(Panel):
          'down':    standard.scrollDown
          }
         for ref in self._refs.keys():
-            if pyzzle.design or self._refs[ref] in slides:
-                link=slides[self._refs[ref]] if self._refs[ref] in slides else None
+            if pyzzle.design or self._refs[ref] in Slide:
+                link=Slide[self._refs[ref]] if self._refs[ref] in Slide else None
                 hotspot=Hotspot(self, link, id=ref, 
                                 rectRel=RelativeRect(rectRels[ref]), 
                                 cursor=ref+'.png', onTransition=transitions[ref],
@@ -104,7 +107,7 @@ class Slide(Panel):
             the slide for the first time. This was added specifically for the "Dryzzle" 
             video game, and may be dropped in a future version.
         """
-        if id: slides[id]=self
+        if id: Slide[id]=self
         if not parent: parent=pyzzle.panel
         Panel.__init__(self)
         self.id = id

@@ -2,10 +2,10 @@ import pygame, sys, sqlite3
 
 import pyzzle
 import DB
-from Slide import Slide, slides
-from Hotspot import Hotspot, hotspots
-from Switch import Switch, switches
-from Item import Item, items
+from Slide import Slide
+from Hotspot import Hotspot
+from Switch import Switch
+from Item import Item
 from Panel import Panel
 from Text import Text
 from standard import *
@@ -18,8 +18,8 @@ cursor.image=pygame.Surface((0,0))
 screen=None
 framerate=30
 datafile=None
-globals=DB.Table()
-stages=DB.Table()
+globals=DB.Table('globals', (object,), {})
+stages=DB.Table('stages', (object,), {})
 design=False
 menu=sys.exit
 history=[]
@@ -48,7 +48,7 @@ def load(datafilename):
     
     stages.rows.update(**datafile.select('Stage',value=lambda row: row,key=lambda row: row.id))
     datafile.select('Slide', value=lambda row:Slide._load(row))
-    for slide in slides:  slide._loadRefs()
+    for slide in Slide:  slide._loadRefs()
     datafile.select('Hotspot', value=lambda row:Hotspot._load(row))
     datafile.select('Item',value=lambda row:Item._load(row))
     datafile.select('Switch',value=lambda row:Switch._load(row))
@@ -96,9 +96,9 @@ def play():
                                 pyzzle.history=pyzzle.history[0:-1]
                     elif event.key==K_g:
                         slidename = pyzzle.promptText('Enter slide to jump to:')
-                        if slidename in slides.rows:
+                        if slidename in Slide.rows:
                             pyzzle.panel.sprites.empty()
-                            pyzzle.panel.add(slides[slidename])
+                            pyzzle.panel.add(Slide[slidename])
             if event.type == MOUSEBUTTONDOWN:
                 pyzzle.panel.click(design=(pygame.mouse.get_pressed()[2] and pyzzle.design))
                 

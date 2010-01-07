@@ -1,21 +1,23 @@
 import sqlite3
 import os
-from linq                   import *
+from linq import *
 
-class Table:
+class Table(type):
     """A class corresponding to a table in """
-    def __init__(self):
-        self.rows={}
-    def __getattr__(self, attr):
-        return self.rows[attr]
-    def __getitem__(self, key):
-        return self.rows[key]
-    def __setitem__(self, key, value):
-        self.rows[key]=value
-    def __iter__(self):
-        return self.rows.itervalues()
-    def __contains__(self,attr):
-        return attr in self.rows
+    def __init__(cls, name, bases=(), attrs={}):
+        super(Table, cls).__init__(name, bases, attrs)
+        cls.rows={}
+    def __getattr__(cls, attr):
+        return cls.rows[attr]
+    def __getitem__(cls, key):
+        return cls.rows[key]
+    def __setitem__(cls, key, value):
+        cls.rows[key]=value
+    def __contains__(cls,item):
+        if type(item)==cls: return item in cls.rows.values()
+        else:               return item in cls.rows.keys()
+    def __iter__(cls):
+        return cls.rows.itervalues()
 class Row:
     def __init__(self, tuple_, columns):
         self.cells={}

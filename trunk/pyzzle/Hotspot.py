@@ -12,17 +12,17 @@ import standard
 from RelativeRect import RelativeRect
 from DB import Table
 
-hotspots=Table()
 class Hotspot(Sprite):
     """Pygame Sprites representing parts of a slide 
     that the user can click."""
+    __metaclass__=Table
     
     cursorDefault  ='fwd.png'
     
     @staticmethod
     def _load(row):
-        parent  =Slide.slides[row.parent] if row.parent else None
-        link    =Slide.slides[row.link] if row.link else None
+        parent  =Slide.Slide[row.parent] if row.parent else None
+        link    =Slide.Slide[row.link] if row.link else None
         hotspot=Hotspot(parent, link, 
                        rectRel=RelativeRect((row.left, row.top, row.width, row.height)), 
                        cursor=row.cursor,
@@ -85,7 +85,7 @@ class Hotspot(Sprite):
             parent to link when the Hotspot is clicked.
         """
         if not cursor:  cursor=Hotspot.cursorDefault
-        if id:          hotspots[id]=self
+        if id:          Hotspot[id]=self
         Sprite.__init__(self)
         self.id=id
         self.parent=parent
@@ -222,7 +222,7 @@ class Hotspot(Sprite):
             #add custom hotspot
             hotspotname=pyzzle.promptText("Enter hotspot name: ", 
                                           self.parent.id+self.id if self.id else '')
-            if hotspotname and hotspotname not in hotspots.rows:
+            if hotspotname and hotspotname not in Hotspot.rows:
                 cursorfile=pyzzle.promptText("Enter cursor file: ", 'fwd.png')
                 if cursorfile:
                     hotspot=Hotspot(parent=self.parent, link=None, 
@@ -246,8 +246,8 @@ class Hotspot(Sprite):
             slidename=pyzzle.promptText('Enter slide name:')
             if slidename:
                 slide=None
-                if slidename in Slide.slides.rows:
-                    slide=Slide.slides[slidename]
+                if slidename in Slide.Slide.rows:
+                    slide=Slide.Slide[slidename]
                 else:
                     slidefile=pyzzle.promptText('Enter slide file:', slidename+'.jpg')
                     if slidefile:
