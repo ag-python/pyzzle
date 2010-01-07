@@ -1,6 +1,6 @@
 import pyzzle
-from pyzzle.Slide import Slide, slides
-from pyzzle.Hotspot import Hotspot, hotspots
+from pyzzle.Slide import Slide
+from pyzzle.Hotspot import Hotspot
 from pyzzle.Panel import Panel
 from pygame.sprite import Group
 from pygame.rect import Rect
@@ -8,15 +8,16 @@ from RelativeRect import RelativeRect
 from DB import Table
 import standard
 
-items=Table()
 class Item:
+    __metaclass__=Table
     inventory=Group()
+    
     @staticmethod
     def _load(row):
-        gameSlide=slides[row.gameslide] if row.gameslide else None
-        gameHotspot=hotspots[row.gamehotspot] if row.gamehotspot else None
-        menuSlide=slides[row.menuslide] if row.menuslide else None
-        closeupSlide=slides[row.closeupslide] if row.closeupslide else None
+        gameSlide=Slide[row.gameslide] if row.gameslide else None
+        gameHotspot=Hotspot[row.gamehotspot] if row.gamehotspot else None
+        menuSlide=Slide[row.menuslide] if row.menuslide else None
+        closeupSlide=Slide[row.closeupslide] if row.closeupslide else None
         
         item=Item(gameSlide, gameHotspot, row.takenfile,
                   menuSlide, closeupSlide, id=row.id, taken=row.taken)
@@ -27,7 +28,7 @@ class Item:
                  menuSlide, closeupSlide=None,
                  id=None, taken=False, 
                  onTake=lambda item:None, onUse=lambda item:None):
-        if id: items[id]=self
+        if id: Item[id]=self
         
         self.menuSlide=menuSlide
         if menuSlide:
