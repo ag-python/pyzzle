@@ -273,6 +273,8 @@ def endTransition(oldslide, newslide, delay=0, panel=None):
     if oldslide:
         panel.remove(oldslide)
     pyzzle.history.append((oldslide, newslide))
+def _noTransition(*p,**k):
+    pass
 def transition(oldslide=None, newslide=None, delay=0, **param):
     """Basic transition function.
     Pauses the game for a given number of seconds, then flashes to newslide
@@ -287,7 +289,6 @@ def transition(oldslide=None, newslide=None, delay=0, **param):
     beginTransition(oldslide, newslide, delay, **param)
     pause(delay)
     endTransition(oldslide, newslide, delay, **param)
-
 def _scroll(oldslide, newslide, towards, aways, delay=0, **param):
     beginTransition(oldslide, newslide, delay, **param)
     screen=pyzzle.screen.get_rect()

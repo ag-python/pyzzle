@@ -13,7 +13,7 @@ class Switch:
         onslide=Slide[row.onslide] if row.onslide else None
         offslide=Slide[row.offslide] if row.offslide else None
         switches=[]
-        if row.onhotspot: switches+=[hotspots[row.onhotspot]]
+        if row.onhotspot: switches+=[Hotspot[row.onhotspot]]
         if row.offhotspot: switches+=[Hotspot[row.offhotspot]]
         return Switch(onslide,offslide, switches, on=row.on, id=row.id)
     def __init__(self, onslide, offslide, hotspots, on=False,
@@ -22,7 +22,7 @@ class Switch:
         self.id=id
         self.onslide=onslide
         self.offslide=offslide
-        seHotspotots=hotspots
+        self.hotspots=hotspots
         self.on=on
         self._hotspot=None
         self.onSwitch=onSwitch
