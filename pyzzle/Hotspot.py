@@ -48,7 +48,7 @@ class Hotspot(Sprite):
                  
                  onClick=lambda self: Hotspot.transition(self),
                  onHighlight=lambda self:None,
-                 onTransition=lambda *p,**k:None):
+                 onTransition=standard._noTransition):
         """
         Creates a new Hotspot.
         @param id: A unique identifier for the Hotspot. Used to refer to the Hotspot 
@@ -130,7 +130,7 @@ class Hotspot(Sprite):
         
     def draw(self,screen):
         """Draws the Hotspot's border, if the game is in design mode. """
-        if pyzzle.design and pygame.key.get_mods() & KMOD_SHIFT:
+        if pyzzle.design and pygame.key.get_mods() & KMOD_SHIFT and not self._template:
             if (self._link or not self._template):
                 pygame.draw.rect(screen, pyzzle.Text.Text.colorDefault,
                                  self.rect, 2)
