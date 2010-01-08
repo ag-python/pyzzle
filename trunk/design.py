@@ -1,7 +1,7 @@
 import pyzzle
 
 pyzzle.Text.Text.colorDefault=(255,0,255)
-pyzzle.design=True
+#pyzzle.design=True
 pyzzle.init(name='Dryzzle', fullscreen=False)
 pyzzle.load('main.game')
 

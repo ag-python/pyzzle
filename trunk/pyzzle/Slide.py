@@ -253,7 +253,7 @@ class Slide(Panel):
          'image':self.file,
          'ambientSound' :self._ambiencefile,
          'movementSound':self._movementSoundfile,
-         'left'     :self.left.id if self.left else None,
+         'left'     :self.left.link.id if self.left and self.left.link else None,
          'right'    :self.right.id if self.left else None,
          'up'       :self.up.id if self.left else None,
          'down'     :self.down.id if self.left else None,
@@ -266,6 +266,10 @@ class Slide(Panel):
             cells['recttop']    =top
             cells['rectwidth']  =width
             cells['rectheight'] =height
+        for ref in 'forward', 'up', 'down', 'right', 'left':
+            hotspot=getattr(self,ref)
+            if hotspot and hotspot.link:
+                cells[ref]=hotspot.link.id
         return cells
     def insert(self):
         """Inserts a representation of the slide into the database."""

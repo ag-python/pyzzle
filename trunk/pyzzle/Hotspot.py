@@ -29,7 +29,8 @@ class Hotspot(Sprite):
                        text=row.text,
                        layer=row.layer,
                        id=row.id,
-                       soundfile=row.sound)
+                       soundfile=row.sound,
+                       delay=row.delay)
         if any((row.dragleft,row.dragtop,
                 row.dragwidth,row.dragheight)):
             hotspot.drag=RelativeRect((row.dragleft,row.dragtop,
@@ -223,14 +224,12 @@ class Hotspot(Sprite):
             hotspotname=pyzzle.promptText("Enter hotspot name: ", 
                                           self.parent.id+self.id if self.id else '')
             if hotspotname and hotspotname not in Hotspot.rows:
-                cursorfile=pyzzle.promptText("Enter cursor file: ", 'fwd.png')
+                cursorfile=pyzzle.promptText("Enter cursor file: ", Hotspot.cursorDefault)
                 if cursorfile:
                     hotspot=Hotspot(parent=self.parent, link=None, 
                                     cursor=cursorfile, id=hotspotname)
                     hotspot.onTransition=standard.transition
                     hotspot.rect=selected
-                    sliderect=self.parent._getRect()
-                    hotspot.rectRel=RelativeRect(selected,sliderect)
                     self.parent.add(hotspot)
                     hotspot.insert()
                     hotspot.design(drag=False)
@@ -238,8 +237,8 @@ class Hotspot(Sprite):
             #delete/clear hotspot
             if self._template:
                 self._link=None
-                self.text=None
-            else:            self.kill()
+            else:
+                self.kill()
             self.delete()
         else:
             #edit hotspot
