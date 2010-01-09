@@ -179,8 +179,10 @@ class Hotspot(Sprite):
         This makes it very easy to script certain behavior, 
         such as for locks."""
         self.onTransition(self.parent, self._link, self.delay)
-        
-    def _cells(self):
+    
+    _idcolumn='id'
+    _tablename='Hotspot'
+    def _save(self):
         cells=  \
         {'id':self.id,
          'parent':self.parent.id if self.parent else None,
@@ -194,11 +196,11 @@ class Hotspot(Sprite):
             cells['transition']=self.onTransition.__name__
         if self._rect:
             rectRel=RelativeRect(self._rect, self.parent.rect)
-            cells['left']   =rectRel.left
-            cells['top']    =rectRel.top
-            cells['width']  =rectRel.width
-            cells['height'] =rectRel.height
-        #TODO: dragtop
+            for attr in 'left','top','width','height':
+                cells[attr]=getattr(rectRel,attr)
+        if self.drag:
+            for attr in 'left','top','width','height':
+                cells[attr]=getattr(self.drag,attr)
         return cells
     def insert(self):
         if self.id:
@@ -208,7 +210,7 @@ class Hotspot(Sprite):
                     (self._link.id if self._link else None,
                      self.parent.id if self.parent else None))
             else:
-                pyzzle.datafile.insert('Hotspot',self._cells())
+                pyzzle.datafile.insert('Hotspot',self._save())
     def delete(self):
         if self.id:
             if self._template:

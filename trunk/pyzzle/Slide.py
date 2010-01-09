@@ -245,27 +245,21 @@ class Slide(Panel):
             ambience=media.sounds.load(self.ambiencefile)
             ambience.fadeout(int(delay*1000))
             
-            
-    def _cells(self):
+         
+    _idcolumn='id'
+    _tablename='Slide'
+    def _save(self):
         cells=  \
         {'id':self.id,
          'stage':self.stage.id if self.stage else None,
          'image':self.file,
          'ambientSound' :self._ambiencefile,
          'movementSound':self._movementSoundfile,
-         'left'     :self.left.link.id if self.left and self.left.link else None,
-         'right'    :self.right.id if self.left else None,
-         'up'       :self.up.id if self.left else None,
-         'down'     :self.down.id if self.left else None,
-         'forward'  :self.forward.id if self.left else None,
          'layer'    :self._layer,
          'dialog'   :self.dialog}
         if self.rectRel:
-            left,top,width,height=self.rectRel
-            cells['rectleft']   =left
-            cells['recttop']    =top
-            cells['rectwidth']  =width
-            cells['rectheight'] =height
+            for attr in 'left','top','width','height':
+                cells['rect'+attr]=getattr(self.rectRel, attr)
         for ref in 'forward', 'up', 'down', 'right', 'left':
             hotspot=getattr(self,ref)
             if hotspot and hotspot.link:
@@ -273,7 +267,7 @@ class Slide(Panel):
         return cells
     def insert(self):
         """Inserts a representation of the slide into the database."""
-        pyzzle.datafile.insert('Slide',self._cells())
+        pyzzle.datafile.insert('Slide',self._save())
     def delete(self):
         """Deletes the slide's representation in the database."""
         pyzzle.datafile.delete('Slide',self.id)
@@ -282,4 +276,4 @@ class Slide(Panel):
         @note: While this overrides Sprite.update(), it does not perform 
             the same behavior!
         """
-        pyzzle.datafile.update('Slide',self._cells())
+        pyzzle.datafile.update('Slide',self._save())
