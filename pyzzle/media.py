@@ -14,6 +14,10 @@ class Library:
         self.download=download
         self._load=load
         self.loaded={}
+    def __getitem__(self, key):
+        return self.load(key)
+    def __delitem__(self, key):
+        self.delete(key)
     def load(self, file, **param):
         if file in self.loaded:
             return self.loaded[file]
@@ -48,7 +52,7 @@ class Library:
                 print('Could not load file: '+str(file))
                 data=self.load(self.default)
             return data
-    def unload(self, file):
+    def delete(self, file):
         if file in self.loaded:
             del self.loaded[file]
             
