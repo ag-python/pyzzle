@@ -1,6 +1,5 @@
 import sqlite3
 import os
-from linq import *
 
 class Table(type):
     """A metaclass corresponding to a table in a database
