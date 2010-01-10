@@ -21,6 +21,7 @@ datafile=None
 globals=DB.Table('globals', (object,), {})
 stages=DB.Table('stages', (object,), {})
 design=False
+zip=True
 menu=sys.exit
 history=[]
 

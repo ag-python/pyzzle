@@ -39,10 +39,10 @@ class Slide(Panel):
         row=Row(cells)
         stage=pyzzle.stages[row.stage] if row.stage else None
         slide=Slide(row.id, row.image, stage, ambiencefile=row.ambientSound, 
-                    layer=row.layer, dialog=row.dialog)
+                    rectRel=RelativeRect((row.rectleft, row.recttop, 
+                                    row.rectheight, row.rectwidth)),
+                    layer=row.layer)
         slide._movementSoundfile=row.movementSound
-        slide.rectRel=RelativeRect((row.rectleft, row.recttop, 
-                                    row.rectheight, row.rectwidth))
         slide._refs={}
         if stage and stage.movementSound and not row.movementSound:
             slide._movementSoundfile=stage.movementSound
@@ -86,8 +86,7 @@ class Slide(Panel):
          'image':self.file,
          'ambientSound' :self._ambiencefile,
          'movementSound':self._movementSoundfile,
-         'layer'    :self._layer,
-         'dialog'   :self.dialog}
+         'layer'    :self._layer}
         if self.rectRel:
             for attr in 'left','top','width','height':
                 cells['rect'+attr]=getattr(self.rectRel, attr)
@@ -103,8 +102,9 @@ class Slide(Panel):
     
     def __init__(self, id, file, stage=None, parent=None,
                  ambiencefile=None, rectRel=None, layer=0, 
-                 cursor='', dialog=None):
+                 cursor='', visible=True, enabled=True):
         """Creates a slide. 
+        Parameters:
         @param id: A unique identifier for the Slide. Used to refer to the Slide 
             in scripts and the database
         @param file: The name of the image file drawn by the slide. 
@@ -127,24 +127,20 @@ class Slide(Panel):
             the sprite with the topmost layer is the only one that's activated.
         @param cursor: The name of the cursor file that is displayed when no hotspots are
             highlighted. The default is defined by Panel.cursorDefault. None displays no cursor.
-        @param dialog: The name of the sound file that is played when the player reaches
-            the slide for the first time. This was added specifically for the "Dryzzle" 
-            video game, and may be dropped in a future version.
         """
         if id: Slide[id]=self
         if not parent: parent=pyzzle.panel
         Panel.__init__(self)
         self.id = id
-        self.stage=stage
         self._file = file
-        self._ambiencefile=ambiencefile
-        self._movementSoundfile=None
-        self._layer=layer
-        self.rectRel=rectRel
-        self.cursor=Panel.cursorDefault if cursor =='' else cursor
-        self.dialog=dialog
-        
+        self.stage=stage
         self.parent=parent
+        self._ambiencefile=ambiencefile
+        self.rectRel=rectRel
+        self._layer=layer
+        self.cursor=Panel.cursorDefault if cursor =='' else cursor
+        
+        self._movementSoundfile=None
         self._rect=None
         self.loaded=False
         """Whether the player has loaded the slide's image file 
@@ -248,9 +244,7 @@ class Slide(Panel):
         @param delay: The time it should take for oldslide to transition to self
         """
         Panel.enter(self, oldslide, delay)
-        if self.dialog and not self.visited:
-            self.visited=True
-            media.voices.load(self.dialog).play()
+        self.visited=True
         if self.ambiencefile:
             ambience=media.sounds.load(self.ambiencefile)
             if ambience.get_num_channels() == 0:

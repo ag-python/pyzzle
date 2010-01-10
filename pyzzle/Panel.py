@@ -19,10 +19,14 @@ class Panel(Sprite):
         self._rect=Rect(0,0,0,0)
         self.sprites=LayeredUpdates()
         
+        self.enabled=True
+        """Whether draw(), highlight(), and click() functions of the
+           slide should be called by the parent panel."""
         self.onEnter=lambda x:None
         """The function that is called when the player enters the slide."""
         self.onExit =lambda x:None
         """The function that is called when the player exits the slide."""
+        
     def __iter__(self):
         return self.sprites.__iter__()
     def __contains__(self, sprite):
@@ -33,7 +37,7 @@ class Panel(Sprite):
     def _setRect(self,rect):
         self._rect=rect
     rect=property(_getRect, _setRect)
-    
+        
     def add(self, sprite):
         """Adds the sprite to the Panel. 
         @see: Group.add()
@@ -59,11 +63,11 @@ class Panel(Sprite):
         @param screen: The surface to draw on.
         @see: Group.draw()"""
         for sprite in self.sprites:
-            sprite._getRect()
-            if hasattr(sprite, 'draw'):
-                sprite.draw(screen)
-            elif hasattr(sprite, 'image'):
-                screen.blit(sprite.image, sprite.rect)
+            if not hasattr(sprite, 'enabled') or sprite.enabled:
+                if hasattr(sprite, 'draw'):
+                    sprite.draw(screen)
+                elif hasattr(sprite, 'image'):
+                    screen.blit(sprite.image, sprite.rect)
     def highlight(self):
         """Called when the cursor hovers over the Panel.
         Calls the highlight() method of all nested sprites, where present.
@@ -72,8 +76,9 @@ class Panel(Sprite):
         """
         highlighted=None
         for sprite in self.sprites:
-            if sprite.rect.collidepoint(pyzzle.cursor.rect.center):
-                highlighted=sprite
+            if not hasattr(sprite, 'enabled') or sprite.enabled:
+                if sprite.rect.collidepoint(pyzzle.cursor.rect.center):
+                    highlighted=sprite
         if hasattr(highlighted, 'highlight'):
             return highlighted.highlight()
         else:
@@ -84,8 +89,9 @@ class Panel(Sprite):
         If no click() method is found, nothing happens."""
         highlighted=None
         for sprite in self.sprites:
-            if sprite.rect.collidepoint(pyzzle.cursor.rect.center):
-                highlighted=sprite
+            if not hasattr(sprite, 'enabled') or sprite.enabled:
+                if sprite.rect.collidepoint(pyzzle.cursor.rect.center):
+                    highlighted=sprite
         if hasattr(highlighted, 'click'):
             highlighted.click(**param)
     def enter(self, oldslide=None, delay=.1):
