@@ -19,6 +19,7 @@ class Item:
     You have been warned. 
     """
     __metaclass__=Table
+    
     inventory=Group()
     
     @staticmethod

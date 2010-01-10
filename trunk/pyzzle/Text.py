@@ -1,3 +1,4 @@
+"""Presents text to the user"""
 import os
 import media
 import pyzzle
@@ -5,11 +6,13 @@ from pygame.rect import *
 from pygame.sprite import *
 
 class Text(Sprite):
+    """Presents text to the user"""
     fontFileDefault='freesansbold.ttf'
     fontSizeDefault=32
     colorDefault=(0,0,0)
     def __init__(self, text, fontFile=None, fontSize=None, color=None,
                  slide=None, rectRel=None, onClick=None, cursor=None):
+        """Creates new Text"""
         if not fontFile: fontFile=Text.fontFileDefault
         if not fontSize: fontSize=Text.fontSizeDefault
         if not color: color=Text.colorDefault
@@ -26,6 +29,11 @@ class Text(Sprite):
         self.onClick=onClick
         self.cursor=cursor
     def _getRect(self):
+        """The coordinates of the movie.
+        rect coordinates are determined by rectRel. 
+        If a coordinate in rectRel is None, the coordinate is 
+        determined by the slide's image size. 
+        """
         if self.rectRel:
             slideRect=self.slide.image.get_rect()
             left, top, width, height=self.rectRel
@@ -48,6 +56,7 @@ class Text(Sprite):
             self._loadImage()
     
     def _loadImage(self):
+        """The image of text as presented to the user"""
         font=media.fonts.load(self.fontFile)
         self.image=font.render(self.text, False, self.color)
         self._getRect()
@@ -56,12 +65,15 @@ class Text(Sprite):
         return self.image
     
     def draw(self, screen):
+        """Writes the text to the screen"""
         text=self._getImage()
         textrect=self._getRect()
         screen.blit(text, textrect)
     def highlight(self):
+        """Called when text is highlighted by the user."""
         if self.cursor:
             pyzzle.cursor.image=media.cursors.load(self.cursor)
     def click(self,*param):
+        """Called when user clicks on the text. Runs onClick() function"""
         if self.onClick:
             self.onClick()
