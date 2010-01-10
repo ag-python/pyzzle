@@ -8,7 +8,7 @@ from pygame.surface import Surface
 from RelativeRect import RelativeRect
 from Hotspot import Hotspot
 from Panel import Panel
-from DB import Table
+from DB import Table,Row
 import pyzzle
 import standard
 import Text
@@ -32,15 +32,16 @@ class Slide(Panel):
     
     __metaclass__=Table
     
-    
     @staticmethod
-    def _load(row):
+    def _load(cells):
+        row=Row(cells)
         stage=pyzzle.stages[row.stage] if row.stage else None
         slide=Slide(row.id, row.image, stage, ambiencefile=row.ambientSound, 
                     layer=row.layer, dialog=row.dialog)
-        slide.rectRel=RelativeRect((row.rectleft, row.recttop, row.rectheight, row.rectwidth))
-        slide._refs={}
         slide._movementSoundfile=row.movementSound
+        slide.rectRel=RelativeRect((row.rectleft, row.recttop, 
+                                    row.rectheight, row.rectwidth))
+        slide._refs={}
         if stage and stage.movementSound and not row.movementSound:
             slide._movementSoundfile=stage.movementSound
         for ref in 'forward', 'up', 'down', 'right', 'left':
@@ -76,7 +77,28 @@ class Slide(Panel):
         if self.left and self.right and self.left.link == self.right.link:
             self.right.cursor='right180.png'
             self.left.cursor='left180.png'
-        
+    def _save(self):
+        cells=  \
+        {'id':self.id,
+         'stage':self.stage.id if self.stage else None,
+         'image':self.file,
+         'ambientSound' :self._ambiencefile,
+         'movementSound':self._movementSoundfile,
+         'layer'    :self._layer,
+         'dialog'   :self.dialog}
+        if self.rectRel:
+            for attr in 'left','top','width','height':
+                cells['rect'+attr]=getattr(self.rectRel, attr)
+        for ref in 'forward', 'up', 'down', 'right', 'left':
+            hotspot=getattr(self,ref)
+            if hotspot and hotspot.link:
+                cells[ref]=hotspot.link.id
+        return cells
+    
+    
+    
+    
+    
     def __init__(self, id, file, stage=None, parent=None,
                  ambiencefile=None, rectRel=None, layer=0, 
                  cursor='', dialog=None):
@@ -244,36 +266,4 @@ class Slide(Panel):
            ((not hasattr(newslide, 'ambiencefile')) or self.ambiencefile!=newslide.ambiencefile):
             ambience=media.sounds.load(self.ambiencefile)
             ambience.fadeout(int(delay*1000))
-            
-         
-    _idcolumn='id'
-    _tablename='Slide'
-    def _save(self):
-        cells=  \
-        {'id':self.id,
-         'stage':self.stage.id if self.stage else None,
-         'image':self.file,
-         'ambientSound' :self._ambiencefile,
-         'movementSound':self._movementSoundfile,
-         'layer'    :self._layer,
-         'dialog'   :self.dialog}
-        if self.rectRel:
-            for attr in 'left','top','width','height':
-                cells['rect'+attr]=getattr(self.rectRel, attr)
-        for ref in 'forward', 'up', 'down', 'right', 'left':
-            hotspot=getattr(self,ref)
-            if hotspot and hotspot.link:
-                cells[ref]=hotspot.link.id
-        return cells
-    def insert(self):
-        """Inserts a representation of the slide into the database."""
-        pyzzle.datafile.insert('Slide',self._save())
-    def delete(self):
-        """Deletes the slide's representation in the database."""
-        pyzzle.datafile.delete('Slide',self.id)
-    def update(self):   
-        """Updates the slide's representation in the database.
-        @note: While this overrides Sprite.update(), it does not perform 
-            the same behavior!
-        """
-        pyzzle.datafile.update('Slide',self._save())
+    

@@ -1,3 +1,5 @@
+"""A collection of slides and hotspots that together
+represent an item within the game world.""" 
 import pyzzle
 from pyzzle.Slide import Slide
 from pyzzle.Hotspot import Hotspot
@@ -5,15 +7,23 @@ from pyzzle.Panel import Panel
 from pygame.sprite import Group
 from pygame.rect import Rect
 from RelativeRect import RelativeRect
-from DB import Table
+from DB import Table,Row
 import standard
 
 class Item:
+    """A collection of slides and hotspots that together
+    represent an item within the game world. 
+    
+    @warning: The Item class is still very early in design, 
+    and I reserve the right to radically change as I see fit.
+    You have been warned. 
+    """
     __metaclass__=Table
     inventory=Group()
     
     @staticmethod
-    def _load(row):
+    def _load(cells):
+        row=Row(cells)
         gameSlide=Slide[row.gameslide] if row.gameslide else None
         gameHotspot=Hotspot[row.gamehotspot] if row.gamehotspot else None
         menuSlide=Slide[row.menuslide] if row.menuslide else None

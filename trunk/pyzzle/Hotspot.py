@@ -10,7 +10,7 @@ from pygame.font import *
 from pygame.locals import *
 import standard
 from RelativeRect import RelativeRect
-from DB import Table
+from DB import Table,Row
 
 class Hotspot(Sprite):
     """Pygame Sprites representing parts of a slide 
@@ -20,7 +20,8 @@ class Hotspot(Sprite):
     cursorDefault  ='fwd.png'
     
     @staticmethod
-    def _load(row):
+    def _load(cells):
+        row=Row(cells)
         parent  =Slide.Slide[row.parent] if row.parent else None
         link    =Slide.Slide[row.link] if row.link else None
         hotspot=Hotspot(parent, link, 
@@ -40,7 +41,26 @@ class Hotspot(Sprite):
         if row.transition:
             hotspot.onTransition=getattr(standard, row.transition)
         return hotspot
-
+    def _save(self):
+        cells=  \
+        {'id':self.id,
+         'parent':self.parent.id if self.parent else None,
+         'link'  :self.link.id   if self.link   else None,
+         'cursor':self.cursor,
+         'sound' :self.soundfile,
+         'delay' :self.delay,
+         'layer' :self._layer,
+         'text'  :self.text}
+        if 'lambda' not in self.onTransition.__name__:
+            cells['transition']=self.onTransition.__name__
+        if self._rect:
+            rectRel=RelativeRect(self._rect, self.parent.rect)
+            for attr in 'left','top','width','height':
+                cells[attr]=getattr(rectRel,attr)
+        if self.drag:
+            for attr in 'left','top','width','height':
+                cells['drag'+attr]=getattr(self.drag,attr)
+        return cells
     def __init__(self, parent, link, id=None,
                  rectRel=None, layer=0.0, 
                  cursor='', delay=.1,
@@ -85,8 +105,8 @@ class Hotspot(Sprite):
         @param onTransition: The transition function used to transition from 
             parent to link when the Hotspot is clicked.
         """
-        if not cursor:  cursor=Hotspot.cursorDefault
-        if id:          Hotspot[id]=self
+        if id and not _template:
+            Hotspot[id]=self
         Sprite.__init__(self)
         self.id=id
         self.parent=parent
@@ -180,45 +200,7 @@ class Hotspot(Sprite):
         such as for locks."""
         self.onTransition(self.parent, self._link, self.delay)
     
-    _idcolumn='id'
-    _tablename='Hotspot'
-    def _save(self):
-        cells=  \
-        {'id':self.id,
-         'parent':self.parent.id if self.parent else None,
-         'link'  :self.link.id   if self.link   else None,
-         'cursor':self.cursor,
-         'sound' :self.soundfile,
-         'delay' :self.delay,
-         'layer' :self._layer,
-         'text'  :self.text}
-        if 'lambda' not in self.onTransition.__name__:
-            cells['transition']=self.onTransition.__name__
-        if self._rect:
-            rectRel=RelativeRect(self._rect, self.parent.rect)
-            for attr in 'left','top','width','height':
-                cells[attr]=getattr(rectRel,attr)
-        if self.drag:
-            for attr in 'left','top','width','height':
-                cells[attr]=getattr(self.drag,attr)
-        return cells
-    def insert(self):
-        if self.id:
-            if self._template:
-                pyzzle.datafile.query(("""UPDATE [Slide]
-                    SET [%s] = ? WHERE id = ? """ %(self.id)),
-                    (self._link.id if self._link else None,
-                     self.parent.id if self.parent else None))
-            else:
-                pyzzle.datafile.insert('Hotspot',self._save())
-    def delete(self):
-        if self.id:
-            if self._template:
-                pyzzle.datafile.query(("""UPDATE [Slide] 
-                    SET [%s] = NULL WHERE id = ? """ %(self.id)),
-                    (self.parent.id,))
-            else:
-                pyzzle.datafile.delete('Hotspot', self.id)
+
     def design(self, drag=True):
         selected=pyzzle.dragRect(color=(255,0,255)) if drag else Rect(0,0,0,0)
         if selected.width>10 and selected.height>10:
@@ -233,7 +215,6 @@ class Hotspot(Sprite):
                     hotspot.onTransition=standard.transition
                     hotspot.rect=selected
                     self.parent.add(hotspot)
-                    hotspot.insert()
                     hotspot.design(drag=False)
         elif pygame.key.get_mods() & KMOD_CTRL:
             #delete/clear hotspot
@@ -241,7 +222,6 @@ class Hotspot(Sprite):
                 self._link=None
             else:
                 self.kill()
-            self.delete()
         else:
             #edit hotspot
             slidename=pyzzle.promptText('Enter slide name:')
@@ -260,6 +240,4 @@ class Hotspot(Sprite):
                         slide.insert()
                 if slide:
                     self._link=slide
-                    self.delete()
-                    self.insert()
                     self.click()
