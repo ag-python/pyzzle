@@ -56,10 +56,10 @@ class Hotspot(Sprite):
          'zip'   :self.zip}
         if 'lambda' not in self.onTransition.__name__:
             cells['transition']=self.onTransition.__name__
-        if self._rect:
-            rectRel=RelativeRect(self._rect, self.parent.rect)
-            for attr in 'left','top','width','height':
-                cells[attr]=getattr(rectRel,attr)
+        if self._rect:  
+            self.rectRel=RelativeRect(self._rect, self.parent.rect)
+        for attr in 'left','top','width','height':
+            cells[attr]=getattr(self.rectRel,attr)
         if self.drag:
             for attr in 'left','top','width','height':
                 cells['drag'+attr]=getattr(self.drag,attr)
