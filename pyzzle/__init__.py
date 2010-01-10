@@ -42,18 +42,28 @@ def init(screensize=(800,600), name='Pyzzle', iconfile=None, fullscreen=False):
     pygame.mouse.set_visible(False)
     pygame.display.set_caption(name)
 def load(datafilename):
-    """Loads game data from a SQLite database file.
+    """Loads game data from an SQLite database file.
     @param datafilename: name of the SQLite database file to load
     """
     pyzzle.datafile=DB.DB(datafilename)
     
-    stages.rows.update(**datafile.select('Stage',value=lambda row: row,key=lambda row: row.id))
-    datafile.select('Slide', value=lambda row:Slide._load(row))
+    stages.rows=datafile.load(DB.Row,'Stage')
+    datafile.load(Slide)
     for slide in Slide:  slide._loadRefs()
-    datafile.select('Hotspot', value=lambda row:Hotspot._load(row))
-    datafile.select('Item',value=lambda row:Item._load(row))
-    datafile.select('Switch',value=lambda row:Switch._load(row))
-
+    datafile.load(Hotspot)
+    datafile.load(Item)
+    datafile.load(Switch)
+    
+def save(datafilename=None):
+    """Saves game data to an SQLite database file.
+    @param datafilename: name of the SQLite database file to load,
+        or the currently loaded file, if none specified
+    """
+    if datafilename:
+        pyzzle.datafile=DB.DB(datafilename)
+    datafile.save(Slide)
+    datafile.save(Hotspot)
+    
 def cleanup():
     """Corrects capitalization of any image files mentioned in 
     the loaded SQLite database file. 
@@ -100,6 +110,9 @@ def play():
                         if slidename in Slide.rows:
                             pyzzle.panel.sprites.empty()
                             pyzzle.panel.add(Slide[slidename])
+                    elif event.key==K_s:
+                        pyzzle.save()
+                        pyzzle.prompt('Game saved')
             if event.type == MOUSEBUTTONDOWN:
                 pyzzle.panel.click(design=(pygame.mouse.get_pressed()[2] and pyzzle.design))
                 
