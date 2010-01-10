@@ -32,7 +32,8 @@ class Hotspot(Sprite):
                        layer=row.layer,
                        id=row.id,
                        soundfile=row.sound,
-                       delay=row.delay)
+                       delay=row.delay,
+                       zip=row.zip)
         if any((row.dragleft,row.dragtop,
                 row.dragwidth,row.dragheight)):
             hotspot.drag=RelativeRect((row.dragleft,row.dragtop,
@@ -51,7 +52,8 @@ class Hotspot(Sprite):
          'sound' :self.soundfile,
          'delay' :self.delay,
          'layer' :self._layer,
-         'text'  :self.text}
+         'text'  :self.text,
+         'zip'   :self.zip}
         if 'lambda' not in self.onTransition.__name__:
             cells['transition']=self.onTransition.__name__
         if self._rect:
@@ -64,8 +66,9 @@ class Hotspot(Sprite):
         return cells
     def __init__(self, parent, link, id=None,
                  rectRel=None, layer=0.0, 
-                 cursor='', delay=.1,
-                 soundfile=None, text=None, drag=None, _template=False,
+                 cursor='', delay=.1, zip=False,
+                 soundfile=None, text=None, drag=None,
+                 _template=False,
                  
                  onClick=lambda self: Hotspot.transition(self),
                  onHighlight=lambda self:None,
@@ -84,12 +87,13 @@ class Hotspot(Sprite):
         @param layer: The layer of the Hotspot. Larger numbers represent upper layers. 
             When the player clicks on an area of the Slide where two Sprites overlap,
             the sprite with the topmost layer is the only one that's activated.
-            
         @param cursor: The name of the cursor file that is displayed 
             when no hotspots are highlighted. The default is defined by 
             Panel.cursorDefault. None displays no cursor.
         @param delay: The time that should be taken to transition from parent to link
             when the Hotspot is clicked.
+        @param zip: Whether this is a zip hotspot 
+            (disabled unless zip mode is on and the link has been visited).  
         @param soundfile: The name of the sound file played when the user clicks
             the hotspot.
         @param text: Text that is displayed under the cursor when the user highlights
@@ -97,8 +101,6 @@ class Hotspot(Sprite):
         @type  drag: RelativeRect 
         @param drag: The relative coordinates of the area the user 
             must drag to activate the hotspot.
-        @param _template: Whether the Hotspot is ready made for the Slide. 
-            Not intended for use outside the engine
         @param onClick: The function that is called when the Hotspot is clicked.
             If the drag parameter is specified, this function will not be 
             called until the user has dragged the Hotspot to the correct location.
@@ -106,8 +108,7 @@ class Hotspot(Sprite):
         @param onTransition: The transition function used to transition from 
             parent to link when the Hotspot is clicked.
         """
-        if id and not _template:
-            Hotspot[id]=self
+        if id and not _template: Hotspot[id]=self
         Sprite.__init__(self)
         self.id=id
         self.parent=parent
@@ -119,10 +120,13 @@ class Hotspot(Sprite):
         self.delay=delay
         self._layer=layer
         self.soundfile=soundfile
-        self._template=_template
         self.drag=drag
         self.used=False
         self.text=text
+        self.zip=zip
+        
+        self._template=_template
+        self._enabled=True
         
         self.onClick=onClick
         self.onHighlight=onHighlight
@@ -147,11 +151,17 @@ class Hotspot(Sprite):
         if hasattr(self._link, 'links'): self._link.links.add(self)
     link=property(_getLink, _setLink)
     
-
+    def _getEnabled(self):
+        if not self._enabled:return False
+        if not self.zip:     return True
+        return pyzzle.zip and self.link and self.link.visited
+    def _setEnabled(self,value):
+        self.enabled=value
+    enabled=property(_getEnabled,_setEnabled)
         
     def draw(self,screen):
         """Draws the Hotspot's border, if the game is in design mode. """
-        if pyzzle.design and pygame.key.get_mods() & KMOD_SHIFT and not self._template:
+        if pyzzle.design and pygame.key.get_mods() & KMOD_SHIFT:
             if (self._link or not self._template):
                 pygame.draw.rect(screen, pyzzle.Text.Text.colorDefault,
                                  self.rect, 2)
