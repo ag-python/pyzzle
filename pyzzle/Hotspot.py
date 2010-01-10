@@ -18,6 +18,7 @@ class Hotspot(Sprite):
     __metaclass__=Table
     
     cursorDefault  ='fwd.png'
+    """The value of the cursor attribute when no other is specified"""
     
     @staticmethod
     def _load(cells):

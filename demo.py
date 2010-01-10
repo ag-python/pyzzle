@@ -1,6 +1,6 @@
 import pyzzle
 
-pyzzle.init(name='Dryzzle', fullscreen=True)
+pyzzle.init(name='My Demo', fullscreen=True)
 pyzzle.load('main.game')
 
 def switchCurtains(switch):

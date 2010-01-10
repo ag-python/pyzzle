@@ -1,14 +1,38 @@
+"""Provides high level functionality for accessing media from files"""
 import os
 import pygame
 import pyzzle
 import urlparse, urllib2
 
 class Library:
-    """An object that stores data from files.  
-    The object uses a function, load, to load files within a given folder. 
-    If the file is not found, returns a given default file.
-    If the file has already been loaded, it returns the already loaded data."""
+    """Loads and stores data from files.
+    
+    A pattern often emerges when handling files for video games:
+    check to see if a file exists in a group of folders organized by content type,
+    load the file if it exists, display a place-holder file if something goes wrong, 
+    and most importantly, store the data in the event we want to reach it again. 
+    
+    The Library class handles this pattern. Libraries are used throughout 
+    Pyzzle to lazily initialize persistant content in a Pythonic fashion. 
+    Content from files can be loaded by either the load() method 
+    (e.g. images.load('foobar.jpg')) or as a dictionary (e.g. images['foobar.jpg'] ).
+    
+    In addition, a URL can be specified from which files will download in the
+    event they are not found on the local machine. This frees you from restrictions
+    imposed on the size of your distributable - a game from a 10 MB installer file 
+    could access thousands of MB in content. """
     def __init__(self, folder, load, default=None, download=None):
+        """Creates a Library.
+        @param folder: The relative folder path from which content from this library
+            may be accessed.
+        @param load: The load function that runs upon requesting to load a file 
+            for the first time. Accepts the name of the file and returns 
+            the data contained within the file.
+        @param default: The default data that will be presented in the event 
+            something goes wrong when loading the file.
+        @param download: The name of the URL from which to download content,
+            in the event content is not on the local machine.
+        """
         self.folder=folder
         self.default=default
         self.download=download
@@ -19,6 +43,13 @@ class Library:
     def __delitem__(self, key):
         self.delete(key)
     def load(self, file, **param):
+        """Loads the file from self.folder. 
+        Retrieves existing data in the event the file has been previously loaded, 
+        downloads content from the internet in the event of an error
+        (if url is specified), and displays self.default if all else fails 
+        (if default content is specified). Throws an exception if an error occurs 
+        that is not resolved from a download or default content. 
+        """
         if file in self.loaded:
             return self.loaded[file]
         else:
@@ -53,6 +84,13 @@ class Library:
                 data=self.load(self.default)
             return data
     def delete(self, file):
+        """Deletes data loaded from the file, if present. 
+        Implementing behavior that uses this function may be more
+        trouble than its worth. Only consider this if You're game slows
+        down considerably as more and more content is loaded. Even on 
+        a large (1000+ slide) project, this shouldn't happen when
+        using reasonable slide resolutions. 
+        """
         if file in self.loaded:
             del self.loaded[file]
             

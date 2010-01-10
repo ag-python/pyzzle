@@ -1,5 +1,6 @@
 """
-The basic building blocks of myst games.
+The basic building blocks of myst games. 
+Start here if you're not sure where to go
 """
 import pygame, os
 from pygame.sprite import Group
@@ -16,6 +17,7 @@ import media
 
 class Slide(Panel):
     """The basic building blocks of myst games.
+    
     A typical slide represents a location the player can visit in the game world.
     Some slides may also represent items or switches that the player can interact with.  
     
@@ -108,7 +110,7 @@ class Slide(Panel):
         @param file: The name of the image file drawn by the slide. 
         @type stage: Stage
         @param stage: An area of the game in which the slide occurs. Used to determine
-            default ambience and movement sounds.
+            folder paths and default ambience/movement sounds.
         @type parent: Panel
         @param parent: The panel that the slide is nested within. 
             The default is pyzzle.panel.
@@ -255,8 +257,8 @@ class Slide(Panel):
                 ambience.play(-1, fade_ms=int(delay*1000))
     def exit(self, newslide=None, delay=.1):
         """Called when the user exits the Slide.
-        @type oldslide: Panel
-        @param oldslide: The Panel that was previously presented to the user,
+        @type newslide: Panel
+        @param newslide: The Panel that was previously presented to the user,
             to be replaced by self
         @param delay: The time it should take for oldslide to transition to self,
             in seconds
@@ -266,4 +268,4 @@ class Slide(Panel):
            ((not hasattr(newslide, 'ambiencefile')) or self.ambiencefile!=newslide.ambiencefile):
             ambience=media.sounds.load(self.ambiencefile)
             ambience.fadeout(int(delay*1000))
-    
+
