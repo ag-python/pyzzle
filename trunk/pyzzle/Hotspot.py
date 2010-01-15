@@ -108,7 +108,7 @@ class Hotspot(Sprite):
         @param onTransition: The transition function used to transition from 
             parent to link when the Hotspot is clicked.
         """
-        if id and not _template: Hotspot[id]=self
+        if id and not _template: Hotspot.rows[id]=self
         Sprite.__init__(self)
         self.id=id
         self.parent=parent

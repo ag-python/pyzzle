@@ -19,9 +19,9 @@ class Table(type):
     def __getattr__(cls, attr):
         return cls.rows[attr]
     def __getitem__(cls, key):
-        return cls.rows[key]
-    def __setitem__(cls, key, value):
-        cls.rows[key]=value
+        if not key:         return None
+        if type(key) ==cls: return key
+        else:               return cls.rows[key]
     def __contains__(cls,item):
         if type(item)==cls: return item in cls.rows.values()
         else:               return item in cls.rows.keys()

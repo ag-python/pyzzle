@@ -29,7 +29,7 @@ class Switch:
         return Switch(onslide,offslide, switches, on=row.on, id=row.id)
     def __init__(self, onslide, offslide, hotspots, on=False,
                  onSwitch=lambda self:Switch.switch(self), id=None):
-        if id: Switch[id]=self
+        if id: Switch.rows[id]=self
         self.id=id
         self.onslide=onslide
         self.offslide=offslide
