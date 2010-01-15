@@ -39,7 +39,7 @@ class Item:
                  menuSlide, closeupSlide=None,
                  id=None, taken=False, 
                  onTake=lambda item:None, onUse=lambda item:None):
-        if id: Item[id]=self
+        if id: Item.rows[id]=self
         
         self.menuSlide=menuSlide
         if menuSlide:

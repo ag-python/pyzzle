@@ -15,6 +15,8 @@ import standard
 import Text
 import media
 
+
+
 class Slide(Panel):
     """The basic building blocks of myst games.
     
@@ -34,10 +36,48 @@ class Slide(Panel):
     
     __metaclass__=Table
     
+    def panHotspots(self, direction):
+        panWidth=.2
+        rectRels=\
+        {'left':    Rect(0, rect.top,
+                         screen.width*panWidth,rect.height),
+         'right':   Rect(screen.width*(1-panWidth),rect.top,
+                         screen.width*(panWidth),rect.height) }
+        highlighting={'left':standard.panLeft,
+                      'right':standard.panRight}
+        hotspot=Hotspot(self, None, cursor=direction+'.png',
+                        onHighlight=highlighting[direction],
+                        layer=.1, _template=True)
+        hotspot.rect=highlighting[direction]
+        return hotspot
+    def templateHotspots(self, link, direction):
+        width=.025
+        rectRels=\
+        {'left':    (0,0,width,1.),
+         'right':   (1.-width,0,width,1.),
+         'forward': (width,width,1-width,1-width),
+         'up':      (0,0,1.,width),
+         'down':    (0,1.-width,1.,width) }
+        transitions=\
+        {'left':    standard.scrollLeft,
+         'right':   standard.scrollRight,
+         'forward': standard.transition,
+         'up':      standard.scrollUp,
+         'down':    standard.scrollDown }
+        hotspot=Hotspot(self, link, None, 
+                        rectRel=RelativeRect(rectRels[direction]), 
+                        cursor=direction+'.png', onTransition=transitions[direction],
+                        layer=-1., _template=True)
+        if direction=='forward':
+            hotspot.cursor='fwd.png'
+            hotspot.soundfile = self._movementSoundfile
+        if self._refs['left'] == self._refs['right'] and direction in ('left','right'):
+            hotspot.cursor=cursor=direction+'180.png'
+        return hotspot
     @staticmethod
     def _load(cells):
         row=Row(cells)
-        stage=pyzzle.stages[row.stage] if row.stage else None
+        stage=pyzzle.stages[row.stage]
         slide=Slide(row.id, row.image, stage, ambiencefile=row.ambientSound, 
                     rectRel=RelativeRect((row.rectleft, row.recttop, 
                                     row.rectheight, row.rectwidth)),
@@ -50,35 +90,13 @@ class Slide(Panel):
             slide._refs[ref]=row[ref]
         return slide
     def _loadRefs(self):
-        rectRels=\
-        {'left':    (0,0,.2,1.),
-         'right':   (.8,0,.2,1.),
-         'forward': (.2,.2,.6,.6),
-         'up':      (0,0,1.,.2),
-         'down':    (0,.8,1.,.2)
-         }
-        transitions=\
-        {'left':    standard.scrollLeft,
-         'right':   standard.scrollRight,
-         'forward': standard.transition,
-         'up':      standard.scrollUp,
-         'down':    standard.scrollDown
-         }
-        for ref in self._refs.keys():
-            if pyzzle.design or self._refs[ref] in Slide:
-                link=Slide[self._refs[ref]] if self._refs[ref] in Slide else None
-                hotspot=Hotspot(self, link, id=ref, 
-                                rectRel=RelativeRect(rectRels[ref]), 
-                                cursor=ref+'.png', onTransition=transitions[ref],
-                                layer=-1., _template=True)
-                setattr(self, ref, hotspot)
+        for direction in self._refs:
+            linkname=self._refs[direction]
+            link=Slide[linkname] if linkname else None
+            if pyzzle.design or linkname:
+                hotspot=self.templateHotspots(link, direction)
+                setattr(self,direction,hotspot)
                 self.add(hotspot)
-        if self.forward:
-            self.forward.cursor='fwd.png'
-            self.forward.soundfile = self._movementSoundfile
-        if self.left and self.right and self.left.link == self.right.link:
-            self.right.cursor='right180.png'
-            self.left.cursor='left180.png'
     def _save(self):
         cells=  \
         {'id':self.id,
@@ -128,7 +146,7 @@ class Slide(Panel):
         @param cursor: The name of the cursor file that is displayed when no hotspots are
             highlighted. The default is defined by Panel.cursorDefault. None displays no cursor.
         """
-        if id: Slide[id]=self
+        if id: Slide.rows[id]=self
         if not parent: parent=pyzzle.panel
         Panel.__init__(self)
         self.id = id
@@ -166,24 +184,8 @@ class Slide(Panel):
                 if value:   setattr(rect,attr,value)
             
         if rect.width > screen.width:
-            panHotspot=Hotspot(self, None, cursor='left.png',
-                             onHighlight=standard.panLeft, 
-                             onTransition=lambda *p,**k:None, 
-                             layer=.1, _template=True)
-            panWidth=.2
-            panHotspot.rect=Rect(0, rect.top,
-                                 screen.width*panWidth,
-                                 rect.height)
-            self.add(panHotspot)
-            panHotspot=Hotspot(self, None, cursor='right.png',
-                             onHighlight=standard.panRight, 
-                             onTransition=lambda *p,**k:None, 
-                             layer=.1, _template=True)
-            panHotspot.rect=Rect(screen.width*(1-panWidth),
-                                 rect.top,
-                                 screen.width*(panWidth),
-                                 rect.height)
-            self.add(panHotspot)
+            self.add(self.panHotspots('left'))
+            self.add(self.panHotspots('right'))
         self._rect=rect
     def _getImage(self):
         """The image displayed by the Slide."""
