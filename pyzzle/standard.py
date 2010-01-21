@@ -7,6 +7,7 @@ import pyzzle
 import media
 import pygame
 import sys
+import math
 from pygame.locals import *
 
 def beginDraw():
@@ -18,13 +19,14 @@ def endDraw():
     """Finalizes drawing. 
     Useful for creating custom transitions."""
     pygame.display.flip()
-def drawCursor(cursor):
+def drawCursor(cursor, pos=None):
     """Displays the cursor
     Useful for creating custom transitions."""
     if cursor:
+        if not pos: pos=pygame.mouse.get_pos()
         pyzzle.cursor.image=media.cursors.load(cursor)
         pyzzle.cursor.rect=pyzzle.cursor.image.get_rect()
-        pyzzle.cursor.rect.center=pygame.mouse.get_pos()
+        pyzzle.cursor.rect.center=pos
         pyzzle.screen.blit(pyzzle.cursor.image, pyzzle.cursor.rect)
 def draw():
     """Draws everything in pyzzle.panel. Does not run any highlight() methods."""
@@ -65,6 +67,62 @@ def dragRect(color=(0,0,0)):
             if event.type==MOUSEBUTTONUP:
                 mouseDown=False
     return selected
+
+
+def dragLines(pointlist, cursor='fist.png'):
+    """Waits for user to drag the mouse. 
+    @param cursor: Name of the cursor file to display while dragging 
+    @param pointlist: 
+    @rtype: (int,int)
+    @return: coordinates of the cursor after the drag."""
+    mouseDown=True
+    #pygame.mouse.set_pos(pointlist[0])
+    x,y=pygame.mouse.get_pos()
+    closest=None
+    while mouseDown:
+        pyzzle.beginDraw()
+        
+        x,y = pygame.mouse.get_pos()
+        closest=x,y
+        closestDistance=1e10
+        x1,y1 = pointlist[0]
+        for x2,y2 in pointlist[1:]:
+            
+            dx,dy = x2-x1, y2-y1
+            if   dx==0: xx,yy=x1,y
+            elif dy==0: xx,yy=x,y1
+            else:
+                #find equation for line, y=mx+b
+                m = float(dy)/float(dx)
+                b = y1 - (m * x1)
+                #find equation for perpendicular line, y=nx+c
+                n = -1./m
+                c = y  - (n * x)
+                #find intersection of the two lines, or x where mx+b=nx+c
+                xx = (b - c) / (n - m)
+                yy = m * xx + b
+                #x and y must not exceed line segment 
+                if    xx > x1 > x2 or xx < x1 < x2: 
+                    xx=x1
+                    yy=y1
+                elif  xx > x2 > x1 or xx < x2 < x1: 
+                    xx=x2
+                    yy=y2
+                
+            distance=math.sqrt((xx-x)**2 + (yy-y)**2) 
+            if distance < closestDistance:
+                closestDistance=distance
+                closest=xx,yy
+            x1,y1 = x2,y2
+            
+        pyzzle.drawCursor(cursor, pos=closest)
+        pyzzle.endDraw()
+        for event in pygame.event.get():
+            if event.type==MOUSEBUTTONUP:
+                mouseDown=False
+                
+    return closest==pointlist[-1]
+    
 def drag(cursor='fist.png'):
     """Waits for user to drag the mouse. 
     @param cursor: Name of the cursor file to display while dragging 
