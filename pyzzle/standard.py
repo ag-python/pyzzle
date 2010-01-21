@@ -71,12 +71,14 @@ def dragRect(color=(0,0,0)):
 
 def dragLines(pointlist, cursor='fist.png'):
     """Waits for user to drag the mouse. 
-    @param cursor: Name of the cursor file to display while dragging 
-    @param pointlist: 
-    @rtype: (int,int)
-    @return: coordinates of the cursor after the drag."""
+    @param pointlist: a list of points the cursor will travel along when the user
+        drags the mouse
+    @param cursor: Name of the cursor file to display while dragging
+    @rtype: boolean
+    @return: Whether the user dragged the mouse to the last point of the list."""
+    
     mouseDown=True
-    #pygame.mouse.set_pos(pointlist[0])
+    pygame.mouse.set_pos(pointlist[0])
     x,y=pygame.mouse.get_pos()
     closest=None
     while mouseDown:
