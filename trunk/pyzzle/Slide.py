@@ -51,7 +51,7 @@ class Slide(Panel):
         hotspot.rect=highlighting[direction]
         return hotspot
     def templateHotspots(self, link, direction):
-        width=.025
+        width=.2
         rectRels=\
         {'left':    (0,0,width,1.),
          'right':   (1.-width,0,width,1.),
