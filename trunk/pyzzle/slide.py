@@ -261,5 +261,7 @@ class Slide(Panel):
         if self.ambiencefile and \
            ((not hasattr(newslide, 'ambiencefile')) or self.ambiencefile!=newslide.ambiencefile):
             ambience=media.sounds.load(self.ambiencefile)
-            ambience.fadeout(int(delay*1000))
+            ambience.stop()
+            #currently causes bug in which ambience.get_num_channels() == 1
+            #ambience.fadeout(int(delay*1000))
 
