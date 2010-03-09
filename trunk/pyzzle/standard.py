@@ -272,15 +272,18 @@ def promptChoice(question='', choices=[], allowExit=True, color=None, fontFile=N
                 if selection: return selection.text
         
 #highlight functions
-def _pan(self, towards, aways):
+def _pan(self, towards, aways, x=True):
     screen=pyzzle.screen.get_rect()
-    mousex, mousey=pyzzle.cursor.rect.center
-    distance=getattr(self.rect,aways)-mousex
+    mouse=pyzzle.cursor.rect.center
+    distance=getattr(self.rect,aways)-mouse[not x]
     distance*=.1
-    if not (screen.left <= getattr(self.parent.rect, towards)+distance <= screen.right):
-        self.parent.rect.move_ip(distance,0)
-    else: 
-        setattr(self.parent.rect, aways, getattr(screen, aways))
+    if x:
+        if not (screen.left <= getattr(self.parent.rect, towards)+distance <= screen.right):
+            self.parent.rect.move_ip(distance,0)
+        else:
+            setattr(self.parent.rect, aways, getattr(screen, aways))
+    elif not (screen.top <= getattr(self.parent.rect, towards)+distance <= screen.bottom):
+        self.parent.rect.move_ip(0,distance)
 def panRight(self):
     """Moves the slide right, and jumps back to the slide's left when it con go no further. 
     Used in panoramic slides."""
@@ -289,6 +292,10 @@ def panLeft(self):
     """Moves the slide left, and jumps back to the slide's right when it con go no further. 
     Intended as a choice for Hotspot.onHighlight. Used in panoramic slides."""
     _pan(self, towards='left', aways='right')
+def panUp(self):    
+    _pan(self, towards='top', aways='bottom', x=False)
+def panDown(self): 
+    _pan(self, towards='bottom', aways='top', x=False)
 
 #transition functions
 def beginTransition(oldslide, newslide, delay=0, panel=None):
