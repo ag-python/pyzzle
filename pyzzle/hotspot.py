@@ -140,7 +140,8 @@ class Hotspot(Sprite):
         if self.rectRel:
             self._rect=self.rectRel.absolute(self.parent.rect)
         return self._rect
-    def _setRect(self, rect):  self._rect=rect
+    def _setRect(self, rect):
+        self._rect=rect
     rect=property(_getRect, _setRect)
     
     def _getLink(self):
@@ -212,7 +213,9 @@ class Hotspot(Sprite):
         This makes it very easy to script certain behavior, 
         such as for locks."""
         self.onTransition(self.parent, self._link, self.delay)
-    
+    def kill(self):
+        del Hotspot.rows[self.id]
+        Sprite.kill(self)
 
     def design(self, drag=True):
         selected=pyzzle.dragRect(color=(255,0,255)) if drag else Rect(0,0,0,0)
@@ -226,7 +229,8 @@ class Hotspot(Sprite):
                     hotspot=Hotspot(parent=self.parent, link=None, 
                                     cursor=cursorfile, id=hotspotname)
                     hotspot.onTransition=standard.transition
-                    hotspot.rect=selected
+                    hotspot.rectRel=RelativeRect(selected, self.parent.rect)
+                    print hotspot.rect
                     self.parent.add(hotspot)
                     hotspot.design(drag=False)
         elif pygame.key.get_mods() & KMOD_CTRL:
