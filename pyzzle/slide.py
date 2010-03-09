@@ -41,10 +41,14 @@ class Slide(Panel):
          'left': Rect(0,                        self.rect.top,
                       screen.width*panWidth,    self.rect.height),
          'right':Rect(screen.width*(1-panWidth),self.rect.top,
-                      screen.width*(panWidth),  self.rect.height)
+                      screen.width*(panWidth),  self.rect.height),
+         'up':   Rect(0,                        0,
+                      self.rect.width,          screen.height*(panWidth)),
+         'down': Rect(0,                        screen.height*(1-panWidth),
+                      self.rect.width,          screen.height*(panWidth)),    
         }
-        panCursors={'left': standard.panLeft,
-                    'right':standard.panRight}
+        panCursors={'left': standard.panLeft, 'right':standard.panRight,
+                    'up':   standard.panUp,   'down': standard.panDown,}
         screen=pyzzle.screen.get_rect()
         panHotspot=Hotspot(self, None, cursor=Panel.cursorDefault,
                          onHighlight=panCursors[direction], 
@@ -188,6 +192,9 @@ class Slide(Panel):
         if rect.width > screen.width:
             self.panHotspots('left')
             self.panHotspots('right')
+        if rect.height > screen.height:
+            self.panHotspots('up')
+            self.panHotspots('down')
     def _getImage(self):
         """The image displayed by the Slide."""
         file=self.file
