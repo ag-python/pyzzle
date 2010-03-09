@@ -250,7 +250,6 @@ class Hotspot(Sprite):
                         for ref in 'forward', 'up', 'down', 'right', 'left':
                             slide._refs[ref]=None
                         slide._loadRefs()
-                        slide.insert()
                 if slide:
                     self._link=slide
                     self.click()
