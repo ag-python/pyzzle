@@ -34,7 +34,7 @@ class Slide(Panel):
     
     __metaclass__=Table
     
-    def panHotspots(self):
+    def panHotspots(self, direction):
         panWidth=.2
         screen=pyzzle.screen.get_rect()
         panRects= {
@@ -47,16 +47,10 @@ class Slide(Panel):
                     'right':standard.panRight}
         screen=pyzzle.screen.get_rect()
         panHotspot=Hotspot(self, None, cursor=Panel.cursorDefault,
-                         onHighlight=panCursors['left'], 
+                         onHighlight=panCursors[direction], 
                          onTransition=lambda *p,**k:None, 
                          layer=.1, _template=True)
-        panHotspot.rect=panRects['left']
-        self.add(panHotspot)
-        panHotspot=Hotspot(self, None, cursor=Panel.cursorDefault,
-                         onHighlight=panCursors['right'], 
-                         onTransition=lambda *p,**k:None, 
-                         layer=.1, _template=True)
-        panHotspot.rect=panRects['right']
+        panHotspot.rect=panRects[direction]
         self.add(panHotspot)
     def templateHotspots(self, link, direction):
         width=.2
@@ -192,7 +186,8 @@ class Slide(Panel):
             
         self._rect=rect
         if rect.width > screen.width:
-            self.panHotspots()
+            self.panHotspots('left')
+            self.panHotspots('right')
     def _getImage(self):
         """The image displayed by the Slide."""
         file=self.file
