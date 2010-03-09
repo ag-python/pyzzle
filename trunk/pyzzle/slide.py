@@ -34,20 +34,30 @@ class Slide(Panel):
     
     __metaclass__=Table
     
-    def panHotspots(self, direction):
+    def panHotspots(self):
         panWidth=.2
-        rectRels=\
-        {'left':    Rect(0, rect.top,
-                         screen.width*panWidth,rect.height),
-         'right':   Rect(screen.width*(1-panWidth),rect.top,
-                         screen.width*(panWidth),rect.height) }
-        highlighting={'left':standard.panLeft,
-                      'right':standard.panRight}
-        hotspot=Hotspot(self, None, cursor=direction+'.png',
-                        onHighlight=highlighting[direction],
-                        layer=.1, _template=True)
-        hotspot.rect=highlighting[direction]
-        return hotspot
+        screen=pyzzle.screen.get_rect()
+        panRects= {
+         'left': Rect(0,                        self.rect.top,
+                      screen.width*panWidth,    self.rect.height),
+         'right':Rect(screen.width*(1-panWidth),self.rect.top,
+                      screen.width*(panWidth),  self.rect.height)
+        }
+        panCursors={'left': standard.panLeft,
+                    'right':standard.panRight}
+        screen=pyzzle.screen.get_rect()
+        panHotspot=Hotspot(self, None, cursor=Panel.cursorDefault,
+                         onHighlight=panCursors['left'], 
+                         onTransition=lambda *p,**k:None, 
+                         layer=.1, _template=True)
+        panHotspot.rect=panRects['left']
+        self.add(panHotspot)
+        panHotspot=Hotspot(self, None, cursor=Panel.cursorDefault,
+                         onHighlight=panCursors['right'], 
+                         onTransition=lambda *p,**k:None, 
+                         layer=.1, _template=True)
+        panHotspot.rect=panRects['right']
+        self.add(panHotspot)
     def templateHotspots(self, link, direction):
         width=.2
         rectRels=\
@@ -71,7 +81,8 @@ class Slide(Panel):
             hotspot.soundfile = self._movementSoundfile
         if self._refs['left'] == self._refs['right'] and direction in ('left','right'):
             hotspot.cursor=cursor=direction+'180.png'
-        return hotspot
+        setattr(self,direction,hotspot)
+        self.add(hotspot)
     @staticmethod
     def _load(cells):
         row=Row(cells)
@@ -92,9 +103,7 @@ class Slide(Panel):
             linkname=self._refs[direction]
             link=Slide[linkname] if linkname else None
             if pyzzle.design or linkname:
-                hotspot=self.templateHotspots(link, direction)
-                setattr(self,direction,hotspot)
-                self.add(hotspot)
+                self.templateHotspots(link, direction)
     def _save(self):
         cells=  \
         {'id':self.id,
@@ -181,10 +190,9 @@ class Slide(Panel):
                 value=getattr(rectAbs, attr)
                 if value:   setattr(rect,attr,value)
             
-        if rect.width > screen.width:
-            self.add(self.panHotspots('left'))
-            self.add(self.panHotspots('right'))
         self._rect=rect
+        if rect.width > screen.width:
+            self.panHotspots()
     def _getImage(self):
         """The image displayed by the Slide."""
         file=self.file
